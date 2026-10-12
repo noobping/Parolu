@@ -28,6 +28,7 @@ import requests
 import json
 import time
 import threading
+import unicodedata
 
 from .reader import Reader
 
@@ -211,6 +212,12 @@ class ParoluWindow(Adw.ApplicationWindow):
 
         # Aktuelle Sprache auswählen
         lang_name = self.lang_chooser.get_selected_item().get_string()
+        languages = sorted(self.lang_map, key=lambda name: ''.join(
+            char for char in unicodedata.normalize('NFD', name.casefold())
+            if not unicodedata.combining(char)
+        ))
+        self.lang_chooser.set_model(Gtk.StringList.new(languages))
+        self.lang_chooser.set_selected(languages.index(lang_name))
         self.lang_code = self.lang_map.get(lang_name, "en")
         self._update_voice_chooser(self.lang_code)
         # print ('gewählte Sprache   ', lang_name)
